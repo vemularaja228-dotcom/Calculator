@@ -38,7 +38,7 @@
     }
     button {
       width: 100%;
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 12px;
       background-color: #28a745;
       color: white;
@@ -49,6 +49,12 @@
     }
     button:hover {
       background-color: #218838;
+    }
+    .download-btn {
+      background-color: #007bff;
+    }
+    .download-btn:hover {
+      background-color: #0056b3;
     }
     .receipt {
       margin-top: 25px;
@@ -86,8 +92,58 @@
     <input type="number" id="fixedFee" value="15" />
 
     <button onclick="generateReceipt()">Generate Receipt</button>
+    <button class="download-btn" onclick="downloadReceipt()" id="downloadBtn" style="display:none;">📥 Download Receipt</button>
 
     <div class="receipt" id="receipt" style="display:none;"></div>
 
     <div class="footer">
-      Sagar
+      Sagar | 📞 9959787923<br>
+      © Siri Credit Card Services
+    </div>
+  </div>
+
+  <!-- html2canvas CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    function generateReceipt() {
+      const finalBank = parseFloat(document.getElementById('finalBank').value);
+      const platformRate = parseFloat(document.getElementById('platformCharge').value) / 100;
+      const fixedFee = parseFloat(document.getElementById('fixedFee').value);
+
+      if (isNaN(finalBank) || finalBank <= 0) {
+        alert("Please enter a valid amount sent to bank.");
+        return;
+      }
+
+      const totalFee = (finalBank + fixedFee) / (1 - platformRate) - finalBank;
+      const amountAdded = finalBank + totalFee;
+
+      const platformCharges = amountAdded * platformRate;
+
+      const receipt = `
+        <div class="receipt-title">🧾 Receipt Summary</div>
+        <strong>Amount Sent to Bank:</strong> ₹${finalBank.toFixed(2)}<br>
+        <strong>Amount Added:</strong> ₹${amountAdded.toFixed(2)}<br>
+        <strong>Platform Charges:</strong> ₹${platformCharges.toFixed(2)}<br>
+        <strong>Fixed Server Fee:</strong> ₹${fixedFee.toFixed(2)}<br>
+        <strong>Total Fee:</strong> ₹${totalFee.toFixed(2)}<br>
+      `;
+
+      document.getElementById('receipt').innerHTML = receipt;
+      document.getElementById('receipt').style.display = "block";
+      document.getElementById('downloadBtn').style.display = "block";
+    }
+
+    function downloadReceipt() {
+      const receiptDiv = document.getElementById('receipt');
+      html2canvas(receiptDiv).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'receipt.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+  </script>
+</body>
+</html>
