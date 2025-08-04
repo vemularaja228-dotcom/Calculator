@@ -3,78 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Siri Credit Card Calculator</title>
+  <title>Siri Credit Card Services</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f4f4f4;
+      font-family: 'Courier New', monospace;
+      background: #f5f5f5;
       margin: 0;
-      padding: 20px;
+      padding: 10px;
     }
     .container {
-      max-width: 450px;
+      max-width: 400px;
+      background: white;
+      padding: 20px;
       margin: auto;
-      background: #fff;
-      padding: 25px 30px;
       border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px #ccc;
     }
-    h2 {
+    h2, .receipt-title {
       text-align: center;
       margin-bottom: 20px;
-      color: #333;
     }
     label {
       font-weight: bold;
-      display: block;
-      margin: 12px 0 5px;
     }
     input {
       width: 100%;
+      margin-bottom: 10px;
       padding: 10px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      font-size: 1em;
     }
     button {
       width: 100%;
-      margin-top: 15px;
       padding: 12px;
-      background-color: #28a745;
+      background-color: #4CAF50;
       color: white;
       border: none;
-      font-size: 16px;
-      border-radius: 6px;
+      font-size: 1em;
       cursor: pointer;
+      margin-top: 10px;
     }
-    button:hover {
-      background-color: #218838;
-    }
-    .download-btn {
-      background-color: #007bff;
-    }
-    .download-btn:hover {
-      background-color: #0056b3;
-    }
-    .receipt {
-      margin-top: 25px;
-      background: #fcfcfc;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-    .receipt-title {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .footer {
-      text-align: center;
-      margin-top: 25px;
-      font-size: 13px;
-      color: #777;
+    .receipt-box {
+      background: #000;
+      color: #0f0;
+      font-size: 14px;
+      white-space: pre-wrap;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -82,140 +57,69 @@
   <div class="container">
     <h2>Siri Credit Card Services</h2>
 
-    <label for="amountAdded">Amount Added (₹):</label>
-    <input type="number" id="amountAdded" placeholder="Enter amount added" />
+    <label for="amount">Enter Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount (e.g. 200000)" />
 
-    <label for="finalBank">OR Final Amount Sent to Bank (₹):</label>
-    <input type="number" id="finalBank" placeholder="Enter final amount sent to bank" />
+    <label for="platformPercent">Platform Charges %:</label>
+    <input type="number" id="platformPercent" value="2" />
 
-    <label for="platformCharge">Platform Charges (%)</label>
-    <input type="number" id="platformCharge" value="1.3" step="0.1" />
-
-    <label for="fixedFee">Fixed Server Fee (₹)</label>
+    <label for="fixedFee">Fixed Fee (₹):</label>
     <input type="number" id="fixedFee" value="15" />
 
+    <label for="addedAmount">Amount Added:</label>
+    <input type="number" id="addedAmount" placeholder="Optional" />
+
     <button onclick="generateReceipt()">Generate Receipt</button>
-    <button class="download-btn" onclick="downloadReceipt()" id="downloadBtn" style="display:none;">📥 Download Receipt</button>
-    <button class="download-btn" onclick="shareOnWhatsApp()" id="whatsappBtn" style="display:none;">📤 Share via WhatsApp</button>
 
-    <div class="receipt" id="receipt" style="display:none;"></div>
-
-    <div class="footer">
-      Sagar | 📞 9959787923<br>
-      © Siri Credit Card Services
-    </div>
+    <div class="receipt-box" id="receiptBox" style="display: none;"></div>
   </div>
 
-  <!-- html2canvas CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
   <script>
+    function formatCurrency(num) {
+      return "₹" + Number(num).toFixed(2);
+    }
+
     function generateReceipt() {
-      const amountAddedInput = parseFloat(document.getElementById('amountAdded').value);
-      const finalBankInput = parseFloat(document.getElementById('finalBank').value);
-      const platformRate = parseFloat(document.getElementById('platformCharge').value) / 100;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const platformPercent = parseFloat(document.getElementById('platformPercent').value);
       const fixedFee = parseFloat(document.getElementById('fixedFee').value);
+      const addedAmount = document.getElementById('addedAmount').value;
 
-      let finalBank = 0, amountAdded = 0, platformCharges = 0, totalFee = 0;
-
-      if (!isNaN(amountAddedInput) && amountAddedInput > 0) {
-        // User entered Amount Added
-        platformCharges = amountAddedInput * platformRate;
-        totalFee = platformCharges + fixedFee;
-        finalBank = amountAddedInput - totalFee;
-        amountAdded = amountAddedInput;
-      } else if (!isNaN(finalBankInput) && finalBankInput > 0) {
-        // User entered Final Bank amount
-        totalFee = (finalBankInput + fixedFee) / (1 - platformRate) - finalBankInput;
-        amountAdded = finalBankInput + totalFee;
-        platformCharges = amountAdded * platformRate;
-        finalBank = finalBankInput;
-      } else {
-        alert("Please enter either Amount Added or Final Bank Amount.");
+      if (isNaN(amount) || isNaN(platformPercent) || isNaN(fixedFee)) {
+        alert('Please fill in all required fields');
         return;
       }
 
-      const receipt = `
-        <div class="receipt-title">🧾 Receipt Summary</div>
-        <strong>Amount Added:</strong> ₹${amountAdded.toFixed(2)}<br>
-        <strong>Amount Sent to Bank:</strong> ₹${finalBank.toFixed(2)}<br>
-        <strong>Platform Charges:</strong> ₹${platformCharges.toFixed(2)}<br>
-        <strong>Fixed Server Fee:</strong> ₹${fixedFee.toFixed(2)}<br>
-        <strong>Total Fee:</strong> ₹${totalFee.toFixed(2)}<br>
-      `;
+      const platformFee = (amount * platformPercent) / 100;
+      const totalFee = platformFee + fixedFee;
+      const toBank = amount - totalFee;
 
-      document.getElementById('receipt').innerHTML = receipt;
-      document.getElementById('receipt').style.display = "block";
-      document.getElementById('downloadBtn').style.display = "block";
-      document.getElementById('whatsappBtn').style.display = "block";
-    }
+      const now = new Date().toLocaleString();
 
-    function downloadReceipt() {
-      const receiptDiv = document.getElementById('receipt');
-      html2canvas(receiptDiv).then(canvas => {
-        const link = document.createElement('a');
-        link.download = 'receipt.png';
-        link.href = canvas.toDataURL();
-        link.click();
-      });
-    }
+      const receipt = 
+`-------------------------------
+    Siri Credit Card Services
+    Transaction Receipt
+-------------------------------
+Date       : ${now}
+Handled By : Sagar
+Contact    : 9959787923
 
-    function shareOnWhatsApp() {
-      const amountAddedInput = parseFloat(document.getElementById('amountAdded').value);
-      const finalBankInput = parseFloat(document.getElementById('finalBank').value);
-      const platformRate = parseFloat(document.getElementById('platformCharge').value) / 100;
-      const fixedFee = parseFloat(document.getElementById('fixedFee').value);
+Amount     : ${formatCurrency(amount)}
+Platform % : ${platformPercent.toFixed(2)}%
+Platform ₹ : ${formatCurrency(platformFee)}
+Add. Fee   : ${formatCurrency(fixedFee)}
+${addedAmount ? 'Amount Add : ' + formatCurrency(addedAmount) + '\n' : ''}
+-------------------------------
+Total Fee  : ${formatCurrency(totalFee)}
+To Bank    : ${formatCurrency(toBank)}
+-------------------------------
+Thank you for choosing us!`;
 
-      let finalBank = 0, amountAdded = 0, platformCharges = 0, totalFee = 0;
-
-      if (!isNaN(amountAddedInput) && amountAddedInput > 0) {
-        platformCharges = amountAddedInput * platformRate;
-        totalFee = platformCharges + fixedFee;
-        finalBank = amountAddedInput - totalFee;
-        amountAdded = amountAddedInput;
-      } else if (!isNaN(finalBankInput) && finalBankInput > 0) {
-        totalFee = (finalBankInput + fixedFee) / (1 - platformRate) - finalBankInput;
-        amountAdded = finalBankInput + totalFee;
-        platformCharges = amountAdded * platformRate;
-        finalBank = finalBankInput;
-      } else {
-        alert("Please enter a valid amount.");
-        return;
-      }
-
-      const message = `🧾 *Siri Credit Card Receipt*\n\n` +
-        `Amount Added: ₹${amountAdded.toFixed(2)}\n` +
-        `Amount Sent to Bank: ₹${finalBank.toFixed(2)}\n` +
-        `Platform Charges: ₹${platformCharges.toFixed(2)}\n` +
-        `Fixed Server Fee: ₹${fixedFee.toFixed(2)}\n` +
-        `Total Fee: ₹${totalFee.toFixed(2)}\n\n` +
-        `📞 Sagar - 9959787923`;
-
-      const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(whatsappURL, '_blank');
+      const box = document.getElementById('receiptBox');
+      box.innerText = receipt;
+      box.style.display = 'block';
     }
   </script>
 </body>
 </html>
-<div id="receipt" style="font-family: monospace; border: 1px solid #ccc; padding: 20px; width: fit-content; background: #fdfdfd;">
-  <pre>
--------------------------------
-    Siri Credit Card Services
-        Transaction Receipt
--------------------------------
-Date       : <span id="date"></span>
-Handled By : Sagar
-Contact    : 9959787923
-
-Amount     : ₹<span id="amount"></span>
-Platform % : <span id="platformPercent"></span>%
-Platform ₹ : ₹<span id="platformFee"></span>
-Add. Fee   : ₹<span id="fixedFee"></span>
--------------------------------
-Total Fee  : ₹<span id="totalFee"></span>
-To Bank    : ₹<span id="toBank"></span>
--------------------------------
-     Thank you for choosing us!
-  </pre>
-</div>
-
