@@ -82,7 +82,10 @@
   <div class="container">
     <h2>Siri Credit Card Services</h2>
 
-    <label for="finalBank">Final Amount Sent to Bank (₹):</label>
+    <label for="amountAdded">Amount Added (₹):</label>
+    <input type="number" id="amountAdded" placeholder="Enter amount added" />
+
+    <label for="finalBank">OR Final Amount Sent to Bank (₹):</label>
     <input type="number" id="finalBank" placeholder="Enter final amount sent to bank" />
 
     <label for="platformCharge">Platform Charges (%)</label>
@@ -108,23 +111,34 @@
 
   <script>
     function generateReceipt() {
-      const finalBank = parseFloat(document.getElementById('finalBank').value);
+      const amountAddedInput = parseFloat(document.getElementById('amountAdded').value);
+      const finalBankInput = parseFloat(document.getElementById('finalBank').value);
       const platformRate = parseFloat(document.getElementById('platformCharge').value) / 100;
       const fixedFee = parseFloat(document.getElementById('fixedFee').value);
 
-      if (isNaN(finalBank) || finalBank <= 0) {
-        alert("Please enter a valid amount sent to bank.");
+      let finalBank = 0, amountAdded = 0, platformCharges = 0, totalFee = 0;
+
+      if (!isNaN(amountAddedInput) && amountAddedInput > 0) {
+        // User entered Amount Added
+        platformCharges = amountAddedInput * platformRate;
+        totalFee = platformCharges + fixedFee;
+        finalBank = amountAddedInput - totalFee;
+        amountAdded = amountAddedInput;
+      } else if (!isNaN(finalBankInput) && finalBankInput > 0) {
+        // User entered Final Bank amount
+        totalFee = (finalBankInput + fixedFee) / (1 - platformRate) - finalBankInput;
+        amountAdded = finalBankInput + totalFee;
+        platformCharges = amountAdded * platformRate;
+        finalBank = finalBankInput;
+      } else {
+        alert("Please enter either Amount Added or Final Bank Amount.");
         return;
       }
 
-      const totalFee = (finalBank + fixedFee) / (1 - platformRate) - finalBank;
-      const amountAdded = finalBank + totalFee;
-      const platformCharges = amountAdded * platformRate;
-
       const receipt = `
         <div class="receipt-title">🧾 Receipt Summary</div>
-        <strong>Amount Sent to Bank:</strong> ₹${finalBank.toFixed(2)}<br>
         <strong>Amount Added:</strong> ₹${amountAdded.toFixed(2)}<br>
+        <strong>Amount Sent to Bank:</strong> ₹${finalBank.toFixed(2)}<br>
         <strong>Platform Charges:</strong> ₹${platformCharges.toFixed(2)}<br>
         <strong>Fixed Server Fee:</strong> ₹${fixedFee.toFixed(2)}<br>
         <strong>Total Fee:</strong> ₹${totalFee.toFixed(2)}<br>
@@ -147,17 +161,31 @@
     }
 
     function shareOnWhatsApp() {
-      const finalBank = parseFloat(document.getElementById('finalBank').value);
+      const amountAddedInput = parseFloat(document.getElementById('amountAdded').value);
+      const finalBankInput = parseFloat(document.getElementById('finalBank').value);
       const platformRate = parseFloat(document.getElementById('platformCharge').value) / 100;
       const fixedFee = parseFloat(document.getElementById('fixedFee').value);
 
-      const totalFee = (finalBank + fixedFee) / (1 - platformRate) - finalBank;
-      const amountAdded = finalBank + totalFee;
-      const platformCharges = amountAdded * platformRate;
+      let finalBank = 0, amountAdded = 0, platformCharges = 0, totalFee = 0;
+
+      if (!isNaN(amountAddedInput) && amountAddedInput > 0) {
+        platformCharges = amountAddedInput * platformRate;
+        totalFee = platformCharges + fixedFee;
+        finalBank = amountAddedInput - totalFee;
+        amountAdded = amountAddedInput;
+      } else if (!isNaN(finalBankInput) && finalBankInput > 0) {
+        totalFee = (finalBankInput + fixedFee) / (1 - platformRate) - finalBankInput;
+        amountAdded = finalBankInput + totalFee;
+        platformCharges = amountAdded * platformRate;
+        finalBank = finalBankInput;
+      } else {
+        alert("Please enter a valid amount.");
+        return;
+      }
 
       const message = `🧾 *Siri Credit Card Receipt*\n\n` +
-        `Amount Sent to Bank: ₹${finalBank.toFixed(2)}\n` +
         `Amount Added: ₹${amountAdded.toFixed(2)}\n` +
+        `Amount Sent to Bank: ₹${finalBank.toFixed(2)}\n` +
         `Platform Charges: ₹${platformCharges.toFixed(2)}\n` +
         `Fixed Server Fee: ₹${fixedFee.toFixed(2)}\n` +
         `Total Fee: ₹${totalFee.toFixed(2)}\n\n` +
