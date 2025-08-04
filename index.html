@@ -12,41 +12,39 @@
       padding: 20px;
     }
     .container {
-      max-width: 600px;
+      max-width: 450px;
       margin: auto;
       background: #fff;
-      padding: 35px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
-      margin-bottom: 25px;
-      font-size: 28px;
+      margin-bottom: 20px;
       color: #333;
     }
     label {
       font-weight: bold;
       display: block;
-      margin: 18px 0 8px;
-      font-size: 16px;
+      margin: 12px 0 5px;
     }
     input {
       width: 100%;
-      padding: 14px;
-      font-size: 17px;
-      border-radius: 8px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
     button {
       width: 100%;
-      margin-top: 20px;
-      padding: 14px;
+      margin-top: 15px;
+      padding: 12px;
       background-color: #28a745;
       color: white;
       border: none;
-      font-size: 17px;
-      border-radius: 8px;
+      font-size: 16px;
+      border-radius: 6px;
       cursor: pointer;
     }
     button:hover {
@@ -59,24 +57,23 @@
       background-color: #0056b3;
     }
     .receipt {
-      margin-top: 30px;
+      margin-top: 25px;
       background: #fcfcfc;
       border: 1px solid #ddd;
-      border-radius: 12px;
-      padding: 25px;
-      font-size: 18px;
-      line-height: 1.8;
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 15px;
+      line-height: 1.6;
     }
     .receipt-title {
       text-align: center;
       font-weight: bold;
-      font-size: 20px;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
     .footer {
       text-align: center;
-      margin-top: 30px;
-      font-size: 15px;
+      margin-top: 25px;
+      font-size: 13px;
       color: #777;
     }
   </style>
@@ -97,19 +94,19 @@
     <label for="fixedFee">Fixed Server Fee (₹)</label>
     <input type="number" id="fixedFee" value="15" />
 
-    <button onclick="generateReceipt()">🧮 Generate Receipt</button>
+    <button onclick="generateReceipt()">Generate Receipt</button>
     <button class="download-btn" onclick="downloadReceipt()" id="downloadBtn" style="display:none;">📥 Download Receipt</button>
-    <button class="download-btn" onclick="shareOnWhatsApp()" id="whatsappBtn" style="display:none;">📤 Share on WhatsApp</button>
+    <button class="download-btn" onclick="shareOnWhatsApp()" id="whatsappBtn" style="display:none;">📤 Share via WhatsApp</button>
 
     <div class="receipt" id="receipt" style="display:none;"></div>
 
     <div class="footer">
-      📞 Sagar – 9959787923<br/>
+      Sagar | 📞 9959787923<br>
       © Siri Credit Card Services
     </div>
   </div>
 
-  <!-- html2canvas for image download -->
+  <!-- html2canvas CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
@@ -122,11 +119,13 @@
       let finalBank = 0, amountAdded = 0, platformCharges = 0, totalFee = 0;
 
       if (!isNaN(amountAddedInput) && amountAddedInput > 0) {
+        // User entered Amount Added
         platformCharges = amountAddedInput * platformRate;
         totalFee = platformCharges + fixedFee;
         finalBank = amountAddedInput - totalFee;
         amountAdded = amountAddedInput;
       } else if (!isNaN(finalBankInput) && finalBankInput > 0) {
+        // User entered Final Bank amount
         totalFee = (finalBankInput + fixedFee) / (1 - platformRate) - finalBankInput;
         amountAdded = finalBankInput + totalFee;
         platformCharges = amountAdded * platformRate;
@@ -190,7 +189,7 @@
         `Platform Charges: ₹${platformCharges.toFixed(2)}\n` +
         `Fixed Server Fee: ₹${fixedFee.toFixed(2)}\n` +
         `Total Fee: ₹${totalFee.toFixed(2)}\n\n` +
-        `📞 Sagar – 9959787923`;
+        `📞 Sagar - 9959787923`;
 
       const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(whatsappURL, '_blank');
