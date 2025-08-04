@@ -93,6 +93,7 @@
 
     <button onclick="generateReceipt()">Generate Receipt</button>
     <button class="download-btn" onclick="downloadReceipt()" id="downloadBtn" style="display:none;">📥 Download Receipt</button>
+    <button class="download-btn" onclick="shareOnWhatsApp()" id="whatsappBtn" style="display:none;">📤 Share via WhatsApp</button>
 
     <div class="receipt" id="receipt" style="display:none;"></div>
 
@@ -118,7 +119,6 @@
 
       const totalFee = (finalBank + fixedFee) / (1 - platformRate) - finalBank;
       const amountAdded = finalBank + totalFee;
-
       const platformCharges = amountAdded * platformRate;
 
       const receipt = `
@@ -133,6 +133,7 @@
       document.getElementById('receipt').innerHTML = receipt;
       document.getElementById('receipt').style.display = "block";
       document.getElementById('downloadBtn').style.display = "block";
+      document.getElementById('whatsappBtn').style.display = "block";
     }
 
     function downloadReceipt() {
@@ -143,6 +144,27 @@
         link.href = canvas.toDataURL();
         link.click();
       });
+    }
+
+    function shareOnWhatsApp() {
+      const finalBank = parseFloat(document.getElementById('finalBank').value);
+      const platformRate = parseFloat(document.getElementById('platformCharge').value) / 100;
+      const fixedFee = parseFloat(document.getElementById('fixedFee').value);
+
+      const totalFee = (finalBank + fixedFee) / (1 - platformRate) - finalBank;
+      const amountAdded = finalBank + totalFee;
+      const platformCharges = amountAdded * platformRate;
+
+      const message = `🧾 *Siri Credit Card Receipt*\n\n` +
+        `Amount Sent to Bank: ₹${finalBank.toFixed(2)}\n` +
+        `Amount Added: ₹${amountAdded.toFixed(2)}\n` +
+        `Platform Charges: ₹${platformCharges.toFixed(2)}\n` +
+        `Fixed Server Fee: ₹${fixedFee.toFixed(2)}\n` +
+        `Total Fee: ₹${totalFee.toFixed(2)}\n\n` +
+        `📞 Sagar - 9959787923`;
+
+      const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(whatsappURL, '_blank');
     }
   </script>
 </body>
